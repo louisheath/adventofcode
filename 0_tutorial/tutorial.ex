@@ -248,4 +248,31 @@ defmodule Tutorial do
     even_values = for n <- [1, 2, 3, 4], rem(n, 2) == 0, do: n
     IO.inspect(even_values)
   end
+
+  def err_handling do
+    err =
+      try do
+        5 / 0
+      rescue
+        ArithmeticError -> "Can't divide by zero"
+      end
+
+    IO.puts(err)
+  end
+
+  # goroutines for nubs
+  def concurrency do
+    spawn(fn -> loop(50, 1) end)
+    spawn(fn -> loop(100, 50) end)
+
+    send(self(), {:french, "Bob"})
+
+    # if the atom was a string, we'd need a switch
+    receive do
+      {:german, name} -> IO.puts("Guten tag #{name}")
+      {:french, name} -> IO.puts("Bonjour #{name}")
+    after
+      500 -> IO.puts("Time up")
+    end
+  end
 end
