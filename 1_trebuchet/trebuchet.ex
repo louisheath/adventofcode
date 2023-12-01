@@ -1,5 +1,5 @@
 defmodule Trebuchet do
-  def numberify(line) do
+  def fixNumbers(line) do
     if line === "" do
       ""
     else
@@ -28,17 +28,16 @@ defmodule Trebuchet do
 
         # clean the remainder
         digit <>
-          numberify(String.slice(line, String.length(number), String.length(line)))
+          fixNumbers(String.slice(line, String.length(number), String.length(line)))
       else
-        [head | tail] = line
         # there's no number starting here. check the rest
-        head <> numberify(tail)
+        String.slice(line, 0, 1) <> fixNumbers(String.slice(line, 1, String.length(line)))
       end
     end
   end
 
-  def calibrationValue(line) do
-    num_chars = for n <- String.to_charlist(line), n > 47 and n < 58, do: n
+  def calibrate(line) do
+    num_chars = for n <- String.to_charlist(line), n > 48 and n < 58, do: n
     num_str = List.to_string(num_chars)
 
     first = String.first(num_str)
@@ -49,16 +48,13 @@ defmodule Trebuchet do
   end
 
   def main do
-    {:ok, contents} = File.read("input.txt")
+    {:ok, contents} = File.read("input3.txt")
 
-    sum =
-      contents
-      |> String.split("\n", trim: true)
-      |> Enum.map(fn line -> numberify(line) end)
-      # |> Enum.map(fn line -> IO.inspect(line) end)
-      |> Enum.map(fn line -> calibrationValue(line) end)
-      |> Enum.sum()
-
-    IO.puts("Sum: #{sum}")
+    contents
+    |> String.split("\n", trim: true)
+    |> Enum.map(fn line -> fixNumbers(line) end)
+    |> Enum.map(fn line -> calibrate(line) end)
+    # |> Enum.map(fn line -> IO.inspect(line) end)
+    |> Enum.sum()
   end
 end
