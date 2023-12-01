@@ -1,8 +1,17 @@
 defmodule Trebuchet do
-  def fixNumbers(line) do
+  # is_digit returns true if 1-9
+  def is_digit(char_str) do
+    <<ascii::utf8>> = char_str
+    ascii > 48 and ascii < 58
+  end
+
+  def extract_numbers(line) do
     if line === "" do
       ""
     else
+      head = String.first(line)
+      tail = String.slice(line, 1, String.length(line))
+
       numbers = %{
         "one" => "1",
         "two" => "2",
@@ -22,39 +31,42 @@ defmodule Trebuchet do
           String.slice(line, 0, String.length(number)) === number
         end)
 
-      if length(matches) === 1 do
-        number = Enum.at(matches, 0)
-        digit = numbers[number]
+      cond do
+        is_digit(head) ->
+          head <> extract_numbers(tail)
 
-        # clean the remainder
-        digit <>
-          fixNumbers(String.slice(line, String.length(number), String.length(line)))
-      else
-        # there's no number starting here. check the rest
-        String.slice(line, 0, 1) <> fixNumbers(String.slice(line, 1, String.length(line)))
+        length(matches) === 1 ->
+          digit = numbers[Enum.at(matches, 0)]
+
+          digit <> extract_numbers(tail)
+
+        true ->
+          extract_numbers(tail)
       end
     end
   end
 
-  def calibrate(line) do
-    num_chars = for n <- String.to_charlist(line), n > 48 and n < 58, do: n
-    num_str = List.to_string(num_chars)
+  def take_ends(numbers) do
+    first = String.first(numbers)
+    last = String.slice(numbers, String.length(numbers) - 1, String.length(numbers))
 
-    first = String.first(num_str)
-    last = String.slice(num_str, String.length(num_str) - 1, String.length(num_str))
+    first <> last
+  end
 
-    {calibration, _} = Integer.parse(first <> last)
-    calibration
+  def to_integer(number_str) do
+    {integer, _} = Integer.parse(number_str)
+    integer
   end
 
   def main do
-    {:ok, contents} = File.read("input3.txt")
+    {:ok, contents} = File.read("input.txt")
 
     contents
     |> String.split("\n", trim: true)
-    |> Enum.map(fn line -> fixNumbers(line) end)
-    |> Enum.map(fn line -> calibrate(line) end)
+    |> Enum.map(fn line -> extract_numbers(line) end)
     # |> Enum.map(fn line -> IO.inspect(line) end)
+    |> Enum.map(fn line -> take_ends(line) end)
+    |> Enum.map(fn line -> to_integer(line) end)
     |> Enum.sum()
   end
 end
