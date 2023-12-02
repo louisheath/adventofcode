@@ -12,8 +12,8 @@ def is_possible(max_seen: dict) -> bool:
         return False
     return True
 
-def possible_game_ids(file) -> []:
-  ids = []
+def minimum_cubes(file) -> {}:
+  id_to_min = {}
 
   for line_bytes in file:
     line: str = line_bytes.decode("utf-8").strip("\n")
@@ -21,7 +21,7 @@ def possible_game_ids(file) -> []:
     game_label, game = line.split(":")
     game_id = int(game_label.split(" ")[1])
 
-    max_seen = {
+    min_cubes = {
       "red": 0,
       "green": 0,
       "blue": 0,
@@ -31,18 +31,38 @@ def possible_game_ids(file) -> []:
       for set in hand.split(","):
         # `set` looks like " 10 red"
         _, num, colour = set.split(" ")
-        max_seen[colour] = max(max_seen[colour], int(num))
+        min_cubes[colour] = max(min_cubes[colour], int(num))
 
-    if is_possible(max_seen):
-      ids.append(game_id)  
+    id_to_min[game_id] = min_cubes
 
+  return id_to_min
+
+def possible_ids(id_to_min: dict) -> []:
+  ids = []
+  for game_id in id_to_min:
+    if is_possible(id_to_min[game_id]):
+      ids.append(game_id)
   return ids
+
+def game_powers(id_to_min: dict) -> []:
+  powers = []
+  for game_id in id_to_min:
+    game = id_to_min[game_id]
+    power = game["red"] * game["green"] * game["blue"]
+    powers.append(power)
+  return powers
 
 def main():
   with open(sys.argv[1], 'rb') as file:
-    ids = possible_game_ids(file)
-    print(ids)
-    print(sum(ids))
+    id_to_min = minimum_cubes(file)
+
+    possible = possible_ids(id_to_min)
+    print("Part 1")
+    print(sum(possible))
+
+    powers = game_powers(id_to_min)
+    print("Part 2")
+    print(sum(powers))
 
 if __name__ == "__main__":
     # run with `python3 cubes.py input2.txt`
