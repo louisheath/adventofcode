@@ -5,11 +5,13 @@ class Schema:
   height: int
   width: int
   valid_positions: {}
+  part_numbers: list
 
   def __init__(self, file):
     self.rows = []
     self.height = 0
     self.width = 0
+    self.part_numbers = []
 
     for line_bytes in file:
       line: str = line_bytes.decode("utf-8").strip("\n")
@@ -18,6 +20,7 @@ class Schema:
       self.width = len(line)
 
     self.valid_positions = self.__valid_positions()
+    self.__calculate_part_numbers()
 
   def __valid_positions(self) -> {}:
     valid = {}
@@ -30,20 +33,13 @@ class Schema:
             (row + 1, col - 1), (row + 1, col), (row + 1, col + 1)
           ]
           for (r, c) in neighbours:
-            if not self.__out_of_bounds(r, c):
-              valid[(r, c)] = True
+            valid[(r, c)] = True
     return valid
 
   def __is_symbol(self, char: str) -> bool:
     return not char.isnumeric() and not char == "."
-  
-  def __out_of_bounds(self, row: int, col: int) -> bool:
-    return (row < 0 or col < 0 or
-      row >= self.height or col >= self.width)
 
-  def part_numbers(self) -> list:
-    part_numbers = []
-
+  def __calculate_part_numbers(self):
     for row in range(self.height):
       # left and right track the start and end of a number
       left = -1
@@ -59,36 +55,26 @@ class Schema:
 
         else:
           if left != -1:
-            part_numbers = self.__add_part_number(
-              row, left, right, part_numbers,
-            )
+            self.__add_part_number(row, left, right)
           left = -1
           right = -1
 
       # check if row ended in number
       if left != -1:
-        part_numbers = self.__add_part_number(
-          row, left, right, part_numbers,
-        )
-
-    return part_numbers
+        self.__add_part_number(row, left, right)
           
-  def __add_part_number(
-      self, row: int, left: int, right: int, part_numbers: list,
-  ) -> list:
+  def __add_part_number(self, row: int, left: int, right: int):
     number = int(self.rows[row][left:right + 1])
     for col in range(left, right + 1):
       valid = (row, col) in self.valid_positions
       if valid:
-        part_numbers.append(number)
-        return part_numbers
-    return part_numbers
+        self.part_numbers.append(number)
+        return
 
 def main():
   with open(sys.argv[1], 'rb') as file:
     schema = Schema(file)
-    part_numbers = schema.part_numbers()
-    print(sum(part_numbers))
+    print(sum(schema.part_numbers))
     return
 
 if __name__ == "__main__":
