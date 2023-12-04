@@ -19,16 +19,17 @@ class Schema:
   rows: list
   height: int
   width: int
+
+  # a map from coord adjecent to at least one symbol, to a list of
+  # those symbols' coords
   valid_positions: {}
-  all_numbers: []
-  part_numbers: list
+  all_numbers: list # []Number
 
   def __init__(self, file):
     self.rows = []
     self.height = 0
     self.width = 0
     self.all_numbers = []
-    self.part_numbers = []
 
     for line_bytes in file:
       line: str = line_bytes.decode("utf-8").strip("\n")
@@ -38,7 +39,6 @@ class Schema:
 
     self.valid_positions = self.__valid_positions()
     self.__find_all_numbers()
-    self.__calculate_part_numbers()
 
   def __valid_positions(self) -> {}:
     valid = {}
@@ -84,13 +84,15 @@ class Schema:
         num = int(self.rows[row][left:right + 1])
         self.all_numbers.append(Number(row, left, right, num))
 
-  def __calculate_part_numbers(self):
+  def part_numbers(self):
+    nums = []
     for num in self.all_numbers:
       for col in num.cols():
         valid = (num.row, col) in self.valid_positions
         if valid:
-          self.part_numbers.append(num.value)
+          nums.append(num.value)
           break
+    return nums
 
   def gear_ratios(self):
     # map from asterisk coords to map of numbers coords to number
@@ -124,8 +126,10 @@ class Schema:
 def main():
   with open(sys.argv[1], 'rb') as file:
     schema = Schema(file)
+
+    part_numbers = schema.part_numbers()
     print("Part 1")
-    print(sum(schema.part_numbers)) # should be 517021
+    print(sum(part_numbers)) # should be 517021
 
     ratios = schema.gear_ratios()
     print("Part 2")
