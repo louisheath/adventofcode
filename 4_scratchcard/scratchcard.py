@@ -51,15 +51,37 @@ class ScratchCardTable:
     for card in self.cards:
       scores.append(card.score())
     return scores
+  
+  def total_cards(self) -> int:
+    # to start, we have one of each card
+    counts = []
+    for i in range(0, len(self.cards)):
+      counts.append(1)
+
+    for i in range(0, len(self.cards)):
+      card = self.cards[i]
+      # if card 1 scores 1, we get an extra card 2
+      # if card 2 scores 2, we get extras of 3 and 4.
+      # if we had two card 2s, we'd get 2x of 3 and 4
+      wins = card.wins()
+
+      # add the cards we won
+      for j in range(1, wins + 1):
+        counts[i + j] += counts[i]
+    
+    return sum(counts)
 
 def main():
   with open(sys.argv[1], 'rb') as file:
-    card = ScratchCardTable(file)
+    table = ScratchCardTable(file)
 
-    scores = card.scores()
+    scores = table.scores()
     print("Part 1")
     print(sum(scores)) # 20117
 
+    print("Part 2")
+    print(table.total_cards()) # 13768818
+
 if __name__ == "__main__":
-    # run with `python3 scratchcard.py input2.txt`
+    # run with `python3 scratchcard.py input3.txt`
     main()
