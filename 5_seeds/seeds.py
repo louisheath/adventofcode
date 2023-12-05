@@ -1,3 +1,4 @@
+import time
 import sys
 
 class Map:
@@ -37,6 +38,7 @@ class Map:
 
 class Almanac:
   seeds: list # of string numbers
+  seed_ranges: list # of tuples (start, length)
   maps: list # of Maps
 
   def __init__(self, file):
@@ -48,6 +50,13 @@ class Almanac:
     # line[0] ~= 'seeds: 79 14 55 13'
     self.seeds = lines[0].split(" ")[1:]
     self.maps = []
+
+    # convert seeds to tuples and sort in ascending order
+    self.seed_tuples = []
+    for i in range (0, len(self.seeds), 2):
+      start, length = int(self.seeds[i]), int(self.seeds[i+1])
+      self.seed_tuples.append((start, length))
+    self.seed_tuples.sort(key=lambda x: x[0])
 
     # split and parse each map
     current_map = Map()
@@ -74,9 +83,11 @@ class Almanac:
     return locations
 
   def __seed_is_in_range(self, seed):
-    for i in range(0, len(self.seeds), 2):
-      start = int(self.seeds[i])
-      length = int(self.seeds[i+1])
+    for (start, length) in self.seed_tuples:
+      if seed < start:
+        # the seed is smaller than this range and all later ranges,
+        # as we ordered the list
+        return False
       if seed >= start and seed < start + length:
         return True
     return False
@@ -116,4 +127,8 @@ def main():
 
 if __name__ == "__main__":
     # run with `python3 seeds.py input2.txt`
+    start_time = time.time()
     main()
+    print("--- %s seconds ---" % (time.time() - start_time))
+    # a611789 - 733.5s
+    # latest - 603.6s
