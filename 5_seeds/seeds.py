@@ -1,23 +1,27 @@
 import sys
 
 class Map:
-  mapping: dict
+  mapping: list # of tuples (dest, src_lower, src_upper)
 
   def __init__(self):
-    self.mapping = {}
+    self.mapping = []
 
   def add_mapping(self, line):
-    # e.g. line 50 98 2 means 98->  50, 99->51
+    # e.g. line 50 98 2 means 98->50, 99->51
     dest, src, length = line.split(" ")
-    for i in range (0, int(length)):
-      self.mapping[int(src) + i] = int(dest) + i
+    self.mapping.append(
+      (int(dest), int(src), int(src)+int(length))
+    )
 
   def is_empty(self) -> bool:
     return len(self.mapping) == 0
 
   def get(self, src)-> int:
-    if src in self.mapping:
-      return self.mapping[src]
+    for m in self.mapping:
+      dest_lower, src_lower, src_upper = m
+      if src >= src_lower and src < src_upper:
+        return dest_lower + (src - src_lower)
+    # if no mapping exists, return original
     return src
   
 class Almanac:
@@ -64,7 +68,7 @@ def main():
 
     locations = almanac.locations()
     print("Part 1")
-    print(min(locations))
+    print(min(locations)) # 525792406
 
 if __name__ == "__main__":
     # run with `python3 seeds.py input2.txt`
