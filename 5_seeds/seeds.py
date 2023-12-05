@@ -16,7 +16,7 @@ class Map:
   def is_empty(self) -> bool:
     return len(self.mapping) == 0
 
-  def get(self, src)-> int:
+  def get(self, src) -> int:
     for m in self.mapping:
       dest_lower, src_lower, src_upper = m
       if src >= src_lower and src < src_upper:
@@ -24,6 +24,17 @@ class Map:
     # if no mapping exists, return original
     return src
   
+  # given a dest, find the src that maps to it, assuming
+  # that the mapping is bijective
+  def inverse(self, dest) -> int:
+    for m in self.mapping:
+      dest_lower, src_lower, src_upper = m
+      length = src_upper - src_lower
+      dest_upper = dest_lower + length
+      if dest >= dest_lower and dest < dest_upper:
+        return src_lower + (dest - dest_lower)
+    return dest
+
 class Almanac:
   seeds: list # of string numbers
   maps: list # of Maps
@@ -53,7 +64,7 @@ class Almanac:
     if not current_map.is_empty():
       self.maps.append(current_map)
 
-  def locations(self):
+  def locations_pt1(self):
     locations = []
     for seed in self.seeds:
       next = int(seed)
@@ -62,13 +73,46 @@ class Almanac:
       locations.append(next)
     return locations
 
+  def __seed_is_in_range(self, seed):
+    for i in range(0, len(self.seeds), 2):
+      start = int(self.seeds[i])
+      length = int(self.seeds[i+1])
+      if seed >= start and seed < start + length:
+        return True
+    return False
+
+  def lowest_location_pt2(self) -> int:
+    # now each number in `seeds` is not a seed, but each pair
+    # represents a range of seeds.
+    # there are too many seeds to try. work backwards, starting
+    # at the lowest location, and searching for a matching seed.
+    reversed_maps = list(reversed(self.maps))
+    location = -1
+    while True: 
+      if location % 1000000 == 0:
+        # it takes a while
+        print(location)
+      location += 1
+      next = location
+      for m in reversed_maps:
+        next = m.inverse(next)
+      # we know the seed that maps to the lowest location. is
+      # it in the almanac's range of seeds?
+      seed = next 
+      if self.__seed_is_in_range(seed):
+        return location
+
 def main():
   with open(sys.argv[1], 'rb') as file:
     almanac = Almanac(file)
 
-    locations = almanac.locations()
+    pt1 = almanac.locations_pt1()
     print("Part 1")
-    print(min(locations)) # 525792406
+    print(min(pt1)) # 525792406
+
+    pt2 = almanac.lowest_location_pt2()
+    print("Part 2")
+    print(pt2) # 79004094
 
 if __name__ == "__main__":
     # run with `python3 seeds.py input2.txt`
