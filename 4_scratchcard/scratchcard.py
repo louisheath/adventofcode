@@ -1,6 +1,6 @@
 import sys
 
-class ScratchCardRow:
+class ScratchCard:
   winning: set
   scratched: list
 
@@ -37,28 +37,28 @@ class ScratchCardRow:
       score *= 2
     return score
 
-class ScratchCard:
-  rows: list # []ScratchCardRow
+class ScratchCardTable:
+  cards: list # []ScratchCard
 
   def __init__(self, file):
-    self.rows = []
+    self.cards = []
     for line_bytes in file:
       line: str = line_bytes.decode("utf-8").strip("\n")
-      self.rows.append(ScratchCardRow(line))
+      self.cards.append(ScratchCard(line))
 
   def scores(self) -> int:
     scores = []
-    for row in self.rows:
-      scores.append(row.score())
+    for card in self.cards:
+      scores.append(card.score())
     return scores
 
 def main():
   with open(sys.argv[1], 'rb') as file:
-    card = ScratchCard(file)
+    card = ScratchCardTable(file)
 
     scores = card.scores()
     print("Part 1")
-    print(sum(scores))
+    print(sum(scores)) # 20117
 
 if __name__ == "__main__":
     # run with `python3 scratchcard.py input2.txt`
