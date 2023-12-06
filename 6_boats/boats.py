@@ -48,10 +48,10 @@ def main():
       lines.append(line)
 
     print("Part 1")
-    print(part1(lines))
+    print(part1(lines)) # 2269432
 
     print("Part 2")
-    print(part1(lines))
+    print(part2(lines)) # 35865985
 
 if __name__ == "__main__":
     # run with `python3 boats.py input2.txt`
