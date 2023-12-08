@@ -2,6 +2,7 @@ import sys
 from functools import cmp_to_key
 
 cards = {
+  "J": 1,
   "2": 2,
   "3": 3,
   "4": 4,
@@ -11,7 +12,6 @@ cards = {
   "8": 8,
   "9": 9,
   "T": 10,
-  "J": 11,
   "Q": 12,
   "K": 13,
   "A": 14,
@@ -25,10 +25,54 @@ two_pair = 2
 one_pair = 1
 high_card = 0
 
+def add_jokers(rank: str, jokers: int) -> int:
+  if jokers == 0 or rank == five_of_a_kind:
+    return rank
+
+  # depending on the current hand, determine
+  # what new hand is possible with jokers.
+  new_rank = {}
+
+  if rank == high_card:
+    new_rank = {
+      1: one_pair, 
+      2: three_of_a_kind, 
+      3: four_of_a_kind, 
+      4: five_of_a_kind 
+    }
+  elif rank == one_pair:
+    new_rank = {
+      1: three_of_a_kind,
+      2: three_of_a_kind,
+    }
+  elif rank == two_pair:
+    new_rank = {
+      1: full_house,
+      2: four_of_a_kind,
+    }
+  elif rank == three_of_a_kind:
+    new_rank = {
+      1: four_of_a_kind,
+      2: five_of_a_kind
+    }
+  elif rank == full_house:
+    new_rank = {
+      2: five_of_a_kind,
+      3: five_of_a_kind
+    }
+  elif rank == four_of_a_kind:
+    new_rank = {
+      1: five_of_a_kind,
+      4: five_of_a_kind,
+    }
+
+  return new_rank[jokers]
+
 class Hand:
   cards: str
   bid: int
   type: str
+  jokers: int
 
   def __init__(self, line: str):
     cards, bid = line.split(" ")
@@ -58,7 +102,9 @@ class Hand:
     elif len(grouped) == 4:
       type = one_pair
 
-    self.type = type
+    jokers = grouped.get("J", 0)
+
+    self.type = add_jokers(type, jokers)
 
 def compare(h1: Hand, h2: Hand):
   if h1.type == h2.type:
@@ -98,8 +144,10 @@ def main():
       line: str = line_bytes.decode("utf-8").strip("\n")
       lines.append(line)
 
-    print("Part 1")
-    print(part1(lines)) # 248217452
+    # Part 1 248217452 (J -> 11, rmv `add_jokers`)
+
+    print("Part 2")
+    print(part1(lines)) # 245576185
 
 if __name__ == "__main__":
   # run with `python3 cards.py input2.txt`
