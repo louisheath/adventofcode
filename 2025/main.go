@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	fmt.Println(giftShop())
+	fmt.Println(lobby())
 }
 
 func readFile(filePath string) []string {
