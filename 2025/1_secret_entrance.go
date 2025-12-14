@@ -18,15 +18,17 @@ func secretEntrance() int {
 			log.Fatal(err)
 		}
 
+		step := -1
 		if direction == "R" {
-			dialPosition += distance
-		} else {
-			dialPosition -= distance
+			step = 1
 		}
-		dialPosition = mod(dialPosition, 100)
 
-		if dialPosition == 0 {
-			password++
+		for i := 0; i < distance; i++ {
+			dialPosition = mod(dialPosition+step, 100)
+
+			if dialPosition == 0 {
+				password++
+			}
 		}
 	}
 
