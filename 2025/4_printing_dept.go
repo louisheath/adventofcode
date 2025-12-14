@@ -7,37 +7,48 @@ func printingDept() int {
 
 	total := 0
 
-	for i := 0; i < length; i++ {
-		for j := 0; j < width; j++ {
-			if string(grid[i][j]) != "@" {
-				continue
-			}
-			neighbours := [][]int{
-				{i - 1, j - 1},
-				{i - 1, j},
-				{i - 1, j + 1},
-				{i, j - 1},
-				{i, j + 1},
-				{i + 1, j - 1},
-				{i + 1, j},
-				{i + 1, j + 1},
-			}
-			count := 0
-			for _, n := range neighbours {
-				x, y := n[0], n[1]
-				if x == -1 || x == length || y == -1 || y == width {
-					// out of bounds
+	for {
+		removed := 0
+
+		for i := 0; i < length; i++ {
+			for j := 0; j < width; j++ {
+				if string(grid[i][j]) != "@" {
 					continue
 				}
-				if string(grid[x][y]) == "@" {
-					count++
+				neighbours := [][]int{
+					{i - 1, j - 1},
+					{i - 1, j},
+					{i - 1, j + 1},
+					{i, j - 1},
+					{i, j + 1},
+					{i + 1, j - 1},
+					{i + 1, j},
+					{i + 1, j + 1},
+				}
+				count := 0
+				for _, n := range neighbours {
+					x, y := n[0], n[1]
+					if x == -1 || x == length || y == -1 || y == width {
+						// out of bounds
+						continue
+					}
+					if string(grid[x][y]) == "@" {
+						count++
+					}
+				}
+				if count < 4 {
+					// remove it straight away
+					removed++
+					grid[i] = grid[i][:j] + "x" + grid[i][j+1:]
 				}
 			}
-			if count < 4 {
-				total++
-			}
 		}
-	}
 
-	return total
+		if removed == 0 {
+			// we can't iterate anymore
+			return total
+		}
+		// try to remove some more rolls
+		total += removed
+	}
 }
