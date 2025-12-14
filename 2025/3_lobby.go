@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math"
 	"strconv"
 )
 
@@ -20,22 +21,24 @@ func lobby() int {
 			digits[i] = digit
 		}
 
-		firstDigit := -1
-		firstDigitIndex := 0
-		for i := 0; i < len(bank)-1; i++ {
-			if digits[i] > firstDigit {
-				firstDigit = digits[i]
-				firstDigitIndex = i
+		joltage := 0
+		startIndex := 0
+
+		for i := 11; i >= 0; i-- {
+			highest := -1
+			indexOfHighest := 0
+
+			for j := startIndex; j < len(bank)-i; j++ {
+				if digits[j] > highest {
+					highest = digits[j]
+					indexOfHighest = j
+				}
 			}
-		}
-		secondDigit := -1
-		for i := firstDigitIndex + 1; i < len(bank); i++ {
-			if digits[i] > secondDigit {
-				secondDigit = digits[i]
-			}
+
+			joltage += highest * int(math.Pow(10, float64(i)))
+			startIndex = indexOfHighest + 1
 		}
 
-		joltage := firstDigit*10 + secondDigit
 		total += joltage
 	}
 
