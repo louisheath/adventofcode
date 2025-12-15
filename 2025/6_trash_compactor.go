@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -9,44 +10,67 @@ import (
 func trashCompactor() int {
 	input := readFile("6_input.txt")
 
-	digits := [][]int{}
-	for i := 0; i < len(input)-1; i++ {
-		line := []int{}
-		strs := strings.Split(input[i], " ")
-		for _, s := range strs {
-			if s != "" {
-				digit, err := strconv.Atoi(s)
-				if err != nil {
-					log.Fatal(err)
-				}
-				line = append(line, digit)
-			}
+	// operations left to right
+	operations := []string{}
+	for _, op := range strings.Split(input[len(input)-1], " ") {
+		if op == "" {
+			continue
 		}
-		digits = append(digits, line)
+		operations = append(operations, op)
+	}
+
+	numberGroups := make([][]int, len(operations))
+	groupNumber := 0
+
+	// for every column of characters
+	for i := 0; i < len(input[0]); i++ {
+		number := 0
+		allAreSpaces := true
+		// build the number from bottom to top
+		pow := 0
+		for j := 0; j <= len(input)-2; j++ {
+			row := len(input) - 2 - j
+			char := string(input[row][i])
+			if char == " " {
+				continue
+			}
+			allAreSpaces = false
+			digit, err := strconv.Atoi(char)
+			if err != nil {
+				log.Fatal(err)
+			}
+			number += digit * int(math.Pow(10, float64(pow)))
+			pow++
+		}
+		if allAreSpaces {
+			groupNumber++
+		} else {
+			group := numberGroups[groupNumber]
+			group = append(group, number)
+			numberGroups[groupNumber] = group
+		}
 	}
 
 	total := 0
 
-	operations := strings.Split(input[len(input)-1], " ")
-	j := 0
-	for _, operation := range operations {
-		if operation == "" {
-			continue
-		}
+	for i, op := range operations {
 		answer := 0
-		if operation == "*" {
+		if op == "*" {
 			answer = 1
 		}
-		for _, line := range digits {
-			if operation == "*" {
-				answer *= line[j]
+		numbers := numberGroups[i]
+		for _, num := range numbers {
+			if op == "*" {
+				answer *= num
 			} else {
-				answer += line[j]
+				answer += num
 			}
 		}
 		total += answer
-		j++
 	}
+
+	log.Println(numberGroups)
+	log.Println(len(numberGroups))
 
 	return total
 }
