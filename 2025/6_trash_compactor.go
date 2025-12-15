@@ -69,8 +69,5 @@ func trashCompactor() int {
 		total += answer
 	}
 
-	log.Println(numberGroups)
-	log.Println(len(numberGroups))
-
 	return total
 }
