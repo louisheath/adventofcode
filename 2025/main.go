@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	fmt.Println(trashCompactor())
+	fmt.Println(laboratories())
 }
 
 func readFile(filePath string) []string {
