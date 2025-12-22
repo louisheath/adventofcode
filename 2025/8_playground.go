@@ -55,7 +55,8 @@ func playground() int {
 
 	// Build graph of connected closest junction boxes
 	graph := map[*junctionBox][]*junctionBox{}
-	for i := 0; i < MAX_CONNS && i < len(possibleConns); i++ {
+	var lastConn connection
+	for i := 0; len(graph) < len(junctionBoxes); i++ {
 		conn := possibleConns[i]
 
 		bs1 := graph[conn.a]
@@ -65,45 +66,11 @@ func playground() int {
 		bs2 := graph[conn.b]
 		bs2 = append(bs2, conn.a)
 		graph[conn.b] = bs2
+
+		lastConn = conn
 	}
 
-	// Explore the graph to find the sizes of each circuit
-	circuitSizes := []int{}
-	explored := map[*junctionBox]bool{}
-
-	for b := range graph {
-		if alreadyExplored := explored[b]; alreadyExplored {
-			continue
-		}
-		// bfs this junction box
-		q := []*junctionBox{b}
-		explored[b] = true
-		circuitSize := 1
-		for len(q) > 0 {
-			// dequeue
-			next := q[0]
-			q = q[1:]
-
-			// explore neighbours
-			ns := graph[next]
-			for _, n := range ns {
-				if alreadyExplored := explored[n]; alreadyExplored {
-					continue
-				}
-				q = append(q, n)
-				explored[n] = true
-				circuitSize++
-			}
-		}
-		circuitSizes = append(circuitSizes, circuitSize)
-	}
-
-	// Find the three largest circuits
-	sort.Ints(circuitSizes)
-
-	return circuitSizes[len(circuitSizes)-1] *
-		circuitSizes[len(circuitSizes)-2] *
-		circuitSizes[len(circuitSizes)-3]
+	return lastConn.a.x * lastConn.b.x
 }
 
 type junctionBox struct {
