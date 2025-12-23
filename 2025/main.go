@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	fmt.Println(playground())
+	fmt.Println(movieTheatre())
 }
 
 func readFile(filePath string) []string {
